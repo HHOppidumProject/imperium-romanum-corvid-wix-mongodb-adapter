@@ -3,17 +3,46 @@ const mysql = require('mysql')
 
 const EMPTY = ''
 
+/**
+ * 
+ * Takes in a JSON representing the query to parse and transforms the filter into a string that can be interpreted as an instruction to the database.
+ * 
+ * * For a __combined__ filter to be considered it must have a logical operator embedded (AND, OR and NOT are supported).
+ * * For a __basic__ filter to be considered it must have a query operation embedded:
+ *    * EQ - Equal to
+ *    * NE - Not equal to
+ *    * LT - Less than
+ *    * GT - Greater than
+ *    * GTE - Greater than or equal to
+ * 
+ * @param {JSON} filter the filter to evaluate
+ * @returns {JSON} the query to execute the parsed filter
+ */
 exports.parseFilter = filter => {
+
+  /*
+  * Check if the filter fulfils the minimum requirements to be passed:
+  * * Exists
+  * * Has an operator
+  *
+  */
   if (filter && filter.operator) {
-    const parsed = parseInternal(filter)
-    return parsed ? `WHERE ${parsed}` : EMPTY
+    return parseInternal(filter);
   }
 
   return EMPTY
 }
 
+/**
+ * 
+ * @todo MIGRATE ALL STRING TO JSON REQUEST IN COMPLIANCE WITH [MONGO DB SPEC](https://docs.mongodb.com/manual/reference/operator/query/)
+ * 
+ * @param {JSON} filter the filter to evaluate
+ * @returns {JSON} the result of the parse
+ */
 const parseInternal = filter => {
 
+  // If the filter doesn't exist or the operator is undefined
   if (!filter || filter.operator === undefined) {
     return "TRUE = TRUE";
   }

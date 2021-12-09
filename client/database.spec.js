@@ -8,11 +8,9 @@ const expect = chai.expect
 
 describe('Database', () => {
 
-  process.env['SQL_CONFIG'] = '{ "database":"fooDb" }'
   const escapeStub = sinon.stub()
   const queryStub = sinon.stub()
 
-  const sqlConfig = { database: 'fooDb' }
   const createConnectionStub = sinon
     .stub()
     .withArgs(sqlConfig)

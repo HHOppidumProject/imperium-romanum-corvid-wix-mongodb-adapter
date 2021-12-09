@@ -1,4 +1,4 @@
-const uuid = require('uuid/v4')
+const { v4: uuid } = require('uuid');
 const BadRequestError = require('../model/error/bad-request')
 const NotFoundError = require('../model/error/not-found')
 
@@ -12,14 +12,38 @@ const {
   deleteOne
 } = require('../client/database')
 
-exports.find = async payload => {
-  const { collectionName, filter, sort, skip, limit } = payload
+/**
+ * @typedef { import("mongodb").MongoClient } MongoClient
+ */
+
+/**
+ * <h1> Gets a list of items based on a filter. </h1>
+ * 
+ * Gets the collection name, the filter, number of items to skip from the start, the sort order, and the limit of the number of items to retreive from the request's JSON body.
+ * 
+ * @param {JSON} payload  The body of the request
+ * @param {MongoClient} dbClient  The MongoDB database client
+ * 
+ * @returns {JSON} JSON result of the items queried and the total count of items returned.
+ */
+exports.find = async (payload, dbClient) => {
+
+  // Declare variables from the fields in the payload
+  const { 
+    collectionName, // Get Collection name
+    filter, // Get the filter
+    sort, // Get the sort order
+    skip, // Get the number of items to skip before taking the first item
+    limit // Get the maximum amount of items to retreive
+  } = payload
+
   if (!collectionName)
     throw new BadRequestError('Missing collectionName in request body')
   if (!skip && skip !== 0)
     throw new BadRequestError('Missing skip in request body')
   if (!limit) throw new BadRequestError('Missing limit in request body')
 
+  //Parse the filter
   const parsedFilter = parseFilter(filter)
 
   const [itemsRaw, totalCount] = await Promise.all([

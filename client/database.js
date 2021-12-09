@@ -1,11 +1,5 @@
-const mysql = require('mysql')
+const mongoUtil = require('./mongoUtil');
 
-const envConfig = process.env.SQL_CONFIG;
-
-const sqlConfig = JSON.parse(envConfig || '{"host":"localhost", "database":"corvid", "user":"", "password":""}');
-
-//console.log('Working with sql config: ' + JSON.stringify(sqlConfig))
-const connection = mysql.createConnection(sqlConfig);
 
 exports.select = (table, clause = '', sortClause = '', skip = 0, limit = 1) =>
   query(
@@ -65,14 +59,15 @@ const describeTable = table =>
     })
   })
 
-const query = (query, values, handler) =>
-  new Promise((resolve, reject) => {
-    connection.query(query, values, (err, results, fields) => {
-      if (err) {
-        console.log(err);
-        reject(err)
-      }
-
-      resolve(handler(results, fields))
-    })
-  })
+  exports.query = async (db_name, collectionName, query, dbClient) => {
+    // get mongodb collection ref
+    const mongo = await mongoUtil.getDb(db_name, dbClient);
+    const collRef = mongo.collection(collectionName);
+  
+    return collRef
+      .find(query.filter.query, query.filter.aggregate)
+      .sort(query.sort.sort)
+      .skip(parseInt(query.skip))
+      .limit(parseInt(query.limit))
+      .toArray(); // get a promise
+  };

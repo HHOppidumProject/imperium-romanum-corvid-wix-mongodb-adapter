@@ -1,13 +1,25 @@
 const Schema = require('../service/schema')
 
-exports.findSchemas = async (req, res) => {
-  const findResult = await Schema.find(req.body)
+/**
+ * 
+ * @param {JSON} req 
+ * @param {JSON} res 
+ * @param {MongoClient} dbClient 
+ */
+exports.findSchemas = async (req, res, dbClient) => {
+  const findResult = await Schema.find(req.body, dbClient)
 
   res.json(findResult)
 }
 
-exports.listSchemas = async (req, res) => {
-  const findResult = await Schema.list(req.body)
+/**
+ * 
+ * @param {JSON} req 
+ * @param {JSON} res 
+ * @param {MongoClient} dbClient 
+ */
+exports.listSchemas = async (req, res, dbClient) => {
+  const findResult = await Schema.list(req.body, dbClient)
 
   res.json(findResult)
 }

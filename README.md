@@ -1,8 +1,8 @@
 <h2 align="center">
-  Velo by Wix DB Connectors: External Database Adapter for MySQL
+  Velo by Imperium Romanum: External Database Adapter for MongoDB
 </h1>
 
-This project is a Node.js based adapter that lets you integrate an external MySQL database with your Velo enabled Wix site.
+This project is a Node.js based adapter that lets you integrate an external MongoDB database with your Velo enabled Wix site.
 
 You can use this project as a basis for deploying your own adapter to the Google Cloud AppEngine. We also provide a ready to deploy public Docker Image which can be hosted on [Google Cloud Run](https://cloud.google.com/run/), [Amazon Fargate](https://aws.amazon.com/fargate/) or [Microsoft Azure App Services](https://azure.microsoft.com/en-us/free/apps/). This project contains a basic implementation of the external database collection SPI that has filtering, authorization, and error handling support.
 
@@ -15,7 +15,7 @@ See our [SPI documentation](https://www.wix.com/velo/reference/spis/external-dat
 This project assumes you have a Google Cloud Project with billing enabled. If you don't have one, follow this [free trial guide](https://cloud.google.com/free/).
 
 ## Create a Cloud SQL instance and database
-Go to https://cloud.google.com/sql/docs/mysql/quickstart and create a database and tables with your required schema.
+Go to https://cloud.google.com/sql/docs/MongoDB/quickstart and create a database and tables with your required schema.
 
 ### Configuration
 
@@ -23,9 +23,9 @@ The configuration values are exposed via environment variables. There are three 
 
 - `SECRET_KEY`: The secret key that you will use when connecting the adapter in the Wix Editor. Each request to your adapter will contain this value as `secretKey` in the _requestContext_ key inside the payload.
 - `ALLOWED_OPERATIONS`: The list of all the operations that this adapter will be allowed to perform. For example, if you want to create an adapter that allows read-only access, you can limit these operations to `["get", "find", "count"]`.
-- `SQL_CONFIG`: The configuration that will be used to connect to your SQL instance. This is JSON string that will be passed the mysql.createConnection() function. All available configuration options are documented in the [mysqljs/mysql](https://github.com/mysqljs/mysql#connection-options) driver repository. SQL_CONFIG variable must be in form of 
+- `SQL_CONFIG`: The configuration that will be used to connect to your SQL instance. This is JSON string that will be passed the MongoDB.createConnection() function. All available configuration options are documented in the [MongoDBjs/MongoDB](https://github.com/MongoDBjs/MongoDB#connection-options) driver repository. SQL_CONFIG variable must be in form of 
 ``` {"socketPath":"/cloudsql/[YOUR_SQL_INSTANCE]", "user": "[YOUR_USER]", "password":"[YOUR_PASSWORD]", "database":"DATABASE_YOU_CREATED"} ```
-Cloud SQL instance can be obtained as described [here](https://cloud.google.com/sql/docs/mysql/connect-run#nodejs).
+Cloud SQL instance can be obtained as described [here](https://cloud.google.com/sql/docs/MongoDB/connect-run#nodejs).
 
 
 ## Deploying to Cloud Run using Cloud Console
@@ -34,7 +34,7 @@ Follow the instructions in the Google Cloud Run [Quickstart Guide](https://cloud
 
 In the **Create service form** use the following settings:
 
-1. **Container Image**: Use **gcr.io/corvid-api/mysql-connector-node**.
+1. **Container Image**: Use **gcr.io/corvid-api/MongoDB-connector-node**.
 2. **Deployment Platform**: Select **Cloud Run (fully managed)**.
 3. **Location**: Select **us-east1** region.
 4. **Authentication**: Select **Allow unauthenticated invocations**. This enables access to the connector from Velo.
@@ -45,7 +45,7 @@ Click the displayed URL link to test the deployed connector.
 In the browser you should see the following, which indicates that the connector is running:
 > {"message":"Missing request context"}
 
-Copy the service URL. You will need it to [connect MySQL to your Velo enabled Wix site](#connecting-mysql-to-your-velo-enabled-wix-site).
+Copy the service URL. You will need it to [connect MongoDB to your Velo enabled Wix site](#connecting-MongoDB-to-your-velo-enabled-wix-site).
 
 ## Deploying to Google Cloud Run using the gcloud CLI
 
@@ -65,24 +65,24 @@ Copy the service URL. You will need it to [connect MySQL to your Velo enabled Wi
 4. [Deploy the Velo connector container](https://cloud.google.com/sdk/gcloud/reference/run/deploy):
 
     ```bash
-    gcloud run deploy --image gcr.io/corvid-api/mysql-connector-node --platform managed --region us-east1 --set-env-vars SECRET_KEY=[YOUR SECRET KEY],SQL_CONFIG={YOUR MYSQL CONNECTION STRING},ALLOWED_OPERATIONS=["get", "find", "count", ...]
+    gcloud run deploy --image gcr.io/corvid-api/MongoDB-connector-node --platform managed --region us-east1 --set-env-vars SECRET_KEY=[YOUR SECRET KEY],SQL_CONFIG={YOUR MongoDB CONNECTION STRING},ALLOWED_OPERATIONS=["get", "find", "count", ...]
     ```
 
-    a. At the prompt: **Allow unauthenticated invocations to [mysql-connector-node] (Y/N)?** Choose "Y".
+    a. At the prompt: **Allow unauthenticated invocations to [MongoDB-connector-node] (Y/N)?** Choose "Y".
 
     b. When deployment is successful, the command line output will contain something similar to this:
 
-    > Service [mysql-connector-node] revision [mysql-connector-node-00001-nep] has been deployed and is serving 100 percent of traffic at <https://mysql-connector-node-[autogenerated].run.app>
+    > Service [MongoDB-connector-node] revision [MongoDB-connector-node-00001-nep] has been deployed and is serving 100 percent of traffic at <https://MongoDB-connector-node-[autogenerated].run.app>
 
-Copy the service URL. You will need it to [connect MySQL to your Velo enabled Wix site](#connecting-mysql-to-your-velo-enabled-wix-site).
+Copy the service URL. You will need it to [connect MongoDB to your Velo enabled Wix site](#connecting-MongoDB-to-your-velo-enabled-wix-site).
 
 ## Deploying to Google App Engine using gcloud CLI
 
 1. Check out the source code:
 
   ```bash
-   git clone https://github.com/wix/corvid-external-db-mysql-adapter.git
-   cd corvid-external-db-mysql-adapter
+   git clone https://github.com/wix/corvid-external-db-MongoDB-adapter.git
+   cd corvid-external-db-MongoDB-adapter
   ```
 
 2. [Deploy the local code and/or configuration of your app to App Engine](https://cloud.google.com/sdk/gcloud/reference/app/deploy):
@@ -97,7 +97,7 @@ Copy the service URL. You will need it to [connect MySQL to your Velo enabled Wi
 
 The default [AppEngine instance class](https://cloud.google.com/appengine/docs/standard/#instance_classes) is F1. It works well for small tables of several gigabytes. If your application requires a larger capacity and executing complex and large queries, you can adjust the [instance size](https://cloud.google.com/appengine/docs/standard/#instance_classes) in the app.yaml file located at the root of the project. Please follow the instructions [here](https://cloud.google.com/appengine/docs/standard/nodejs/config/appref). Also, check the pricing in the [Google AppEngine Pricing](https://cloud.google.com/appengine/pricing) page.
 
-## Connecting MySQL to your Velo enabled Wix site
+## Connecting MongoDB to your Velo enabled Wix site
 
 Follow the [instructions here](https://support.wix.com/en/article/velo-adding-and-deleting-an-external-database-collection).
 
@@ -106,7 +106,7 @@ In the connection Dialog settings use the following:
 * **Add an endpoint URL**: Use the **connector service URL** from steps above.
 * **Configuration**: Use: {"secretKey":<**Your secret key from the deployment step**>}
 
-You should now see MySQL tables as collections in the Databases sections of the sidebar in your site.
+You should now see MongoDB tables as collections in the Databases sections of the sidebar in your site.
 
 # Developing and extending the adapter
 
@@ -115,8 +115,8 @@ The following steps describe setting up the environment for developing the adapt
 1. Check out the source code:
 
   ```bash
-   git clone https://github.com/wix/corvid-external-db-mysql-adapter.git
-   cd corvid-external-db-mysql-adapter
+   git clone https://github.com/wix/corvid-external-db-MongoDB-adapter.git
+   cd corvid-external-db-MongoDB-adapter
   ```
 
 2. Create a [GCP Service account](https://cloud.google.com/iam/docs/service-accounts):
@@ -143,7 +143,7 @@ The following steps describe setting up the environment for developing the adapt
   export GOOGLE_APPLICATION_CREDENTIALS=$PWD/gcp-sa-key.json
   ```
 
-6. Set up local MySQL proxy as described [here](https://github.com/GoogleCloudPlatform/nodejs-docs-samples/tree/master/cloud-sql/mysql/mysql#running-locally)
+6. Set up local MongoDB proxy as described [here](https://github.com/GoogleCloudPlatform/nodejs-docs-samples/tree/master/cloud-sql/MongoDB/MongoDB#running-locally)
 
 7. Use the following command to start the Connector. It is a NodeJS express application:
 
@@ -159,7 +159,7 @@ The following steps describe setting up the environment for developing the adapt
 
 The schemas are loaded dynamically from the configured database.
 
-Currently, the driver supports these basic MySQL datatypes:
+Currently, the driver supports these basic MongoDB datatypes:
 * `varchar`,
 * `text`,
 * `decimal`,
